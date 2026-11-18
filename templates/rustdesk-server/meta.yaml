@@ -1,0 +1,72 @@
+name: RustDesk Server
+description:
+  RustDesk Server is the self-hosted backend for the RustDesk remote desktop
+  client. It bundles the ID/rendezvous server (hbbs) and the relay server (hbbr)
+  in a single container, so your RustDesk clients register, find each other and
+  relay traffic through your own infrastructure instead of the public servers.
+  Connections are end-to-end encrypted with a key pair generated on first start.
+instructions:
+  Secure by default - a unique random key pair is generated on first start and
+  clients without it are rejected (ENCRYPTED_ONLY=1). The primary domain of the
+  service is the host your RustDesk clients use (RELAY is set from it). To use
+  your own domain, add it in Domains, make it primary, create a DNS A record to
+  this server (DNS only, no Cloudflare proxy) and redeploy. Open ports
+  21115-21117 TCP and 21116 UDP on your firewall. Optionally set
+  KEY_PUB/KEY_PRIV (from `rustdesk-utils genkeypair`) to provide your own key
+  pair. Read the public key with `cat /data/id_ed25519.pub` in the service
+  console and enter host and key in each client under Settings > Network.
+changeLog:
+  - date: 2026-11-18
+    description: First Release (rustdesk-server-s6 1.1.16)
+links:
+  - label: Website
+    url: https://rustdesk.com/
+  - label: Documentation
+    url: https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/docker/
+  - label: Github
+    url: https://github.com/rustdesk/rustdesk-server
+contributors:
+  - name: David Carrero
+    url: https://github.com/dcarrero
+schema:
+  type: object
+  required:
+    - appServiceName
+    - appServiceImage
+  properties:
+    appServiceName:
+      type: string
+      title: App Service Name
+      default: rustdesk-server
+    appServiceImage:
+      type: string
+      title: App Service Image
+      default: rustdesk/rustdesk-server-s6:1.1.16
+benefits:
+  - title: Your Own Remote Access Infrastructure
+    description:
+      Stop depending on the public RustDesk servers. IDs, signalling and relay
+      traffic stay on a server you control.
+  - title: Encrypted by Default
+    description:
+      A key pair is generated on first start and only clients that know the
+      public key can use the server (ENCRYPTED_ONLY).
+  - title: One Service, All Ports
+    description:
+      hbbs and hbbr run together in one container with a single persistent
+      volume, which keeps the deployment simple.
+features:
+  - title: ID / Rendezvous Server (hbbs)
+    description: Registers clients and brokers peer-to-peer connections.
+  - title: Relay Server (hbbr)
+    description: Relays traffic when a direct connection is not possible.
+  - title: Bring Your Own Keys
+    description:
+      Provide the key pair through the KEY_PUB and KEY_PRIV environment
+      variables, or let the server generate one on first start.
+  - title: Persistent Keys
+    description: Keys and the peer database live in a persistent volume.
+tags:
+  - Remote Desktop
+  - Self-Hosted
+  - Security
